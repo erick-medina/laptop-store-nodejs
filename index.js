@@ -13,7 +13,17 @@ const server = http.createServer((req, res) => { // it's run every time somebody
     // PRODUCTS OVERVIEW
     if (pathName === '/products' || pathName === '/') {
         res.writeHead(200, { 'Content-type': 'text/html'})// http header to let the browser know
-        res.end('This is the products page');
+
+        fs.readFile(`${__dirname}/templates/template-overview.html`, 'utf-8', (err, data) => {
+            let overviewOutput = data;
+
+            fs.readFile(`${__dirname}/templates/template-card.html`, 'utf-8', (err, data) => {
+
+                const cardsOutput = laptopData.map(item => replaceTemplate(data, item)).join('');
+                overviewOutput = overviewOutput.replace('{%CARDS%}', cardsOutput);
+                res.end(overviewOutput);
+            });
+        });
 
     //LAPTOP OVERVIEW
     } else if (pathName === '/laptop' && id < laptopData.length) {
@@ -25,7 +35,14 @@ const server = http.createServer((req, res) => { // it's run every time somebody
             res.end(output); // send response back to the browser
         });
 
-    // URL NOT FOUND
+    // IMAGES
+    } else if((/\.(jpg|jpeg|png|gif)$/i).test(pathName)) { // regular expression to test if pathName contains jpg, jpeg and so on
+        fs.readFile(`${__dirname}/data/img${pathName}`, (err, data) => {
+            res.writeHead(200, { 'Content-type': 'img.jpg'});
+            res.end(data);
+        })
+
+    //URL NOT FOUND
     } else {
         res.writeHead(404, { 'Content-type': 'text/html'})
         res.end('URL was not found on the server');
