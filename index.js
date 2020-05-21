@@ -10,26 +10,22 @@ const server = http.createServer((req, res) => { // it's run every time somebody
     const pathName = url.parse(req.url, true).pathname; // where the url is stored
     const id = url.parse(req.url, true).query.id;
 
+    // PRODUCTS OVERVIEW
     if (pathName === '/products' || pathName === '/') {
         res.writeHead(200, { 'Content-type': 'text/html'})// http header to let the browser know
         res.end('This is the products page');
 
+    //LAPTOP OVERVIEW
     } else if (pathName === '/laptop' && id < laptopData.length) {
         res.writeHead(200, { 'Content-type': 'text/html'})
 
         fs.readFile(`${__dirname}/templates/template-laptop.html`, 'utf-8', (err, data) => { // callback function has 2 parameters in this case (error and data)
             let laptop = laptopData[id];
-            let output = data.replace(/{%PRODUCTNAME%}/g, laptop.productName);
-            output = output.replace(/{%IMAGE%}/g, laptop.image);
-            output = output.replace(/{%PRICE%}/g, laptop.price)
-            output = output.replace(/{%SCREEN%}/g, laptop.screen)
-            output = output.replace(/{%CPU%}/g, laptop.cpu)
-            output = output.replace(/{%STORAGE%}/g, laptop.storage)
-            output = output.replace(/{%RAM%}/g, laptop.ram)
-            output = output.replace(/{%DESCRIPTION%}/g, laptop.description)
+            let output = replaceTemplate(data, laptop)
             res.end(output); // send response back to the browser
         });
 
+    // URL NOT FOUND
     } else {
         res.writeHead(404, { 'Content-type': 'text/html'})
         res.end('URL was not found on the server');
@@ -39,3 +35,16 @@ const server = http.createServer((req, res) => { // it's run every time somebody
 server.listen(8080, '127.0.0.1', () => { // it indicates node.js to always keep listening to a certain port
     console.log('server is listening for requests')
 });
+
+function replaceTemplate(originalHTML, laptop) {
+    let output = originalHTML.replace(/{%PRODUCTNAME%}/g, laptop.productName);
+    output = output.replace(/{%IMAGE%}/g, laptop.image);
+    output = output.replace(/{%PRICE%}/g, laptop.price)
+    output = output.replace(/{%SCREEN%}/g, laptop.screen)
+    output = output.replace(/{%CPU%}/g, laptop.cpu)
+    output = output.replace(/{%STORAGE%}/g, laptop.storage)
+    output = output.replace(/{%RAM%}/g, laptop.ram)
+    output = output.replace(/{%DESCRIPTION%}/g, laptop.description)
+    output = output.replace(/{%ID%}/g, laptop.id)
+    return output;
+}
